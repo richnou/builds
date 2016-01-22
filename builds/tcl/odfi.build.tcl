@@ -116,93 +116,136 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
 
             }
 
-            ## RFG 
-            :config rfg {
+            ## H2DL 
+            ##########
+            :config h2dl {
 
                 :phase init {
 
-                    ## RFG 3
                     :do {
 
-
-                        ## Create folder dev-tcl
-                        if {![file exists rfg3]} {
-                            odfi::git::clone http://ipe-iperic-srv1.ipe.kit.edu:8082/adl/rfg3.git rfg3
+                        ## Create folder
+                        if {![file exists h2dl]} {
+                            odfi::git::clone git@github.com:richnou/h2dl.git h2dl
                         } else {
-                            odfi::git::pull rfg3
+                            odfi::git::pull h2dl
                         }
 
                         ## Create Build File 
                         odfi::richstream::template::stringToFile {#!/bin/bash
 
-    ## 
-    mkdir   -p  out/lib/rfg3
-    mkdir   -p  inst/lib/rfg3
-    cp      -Rf tcl/* out/lib/rfg3
-    cp      -Rf tcl/* inst/lib/rfg3
+## 
+mkdir   -p  out/lib/h2dl
+mkdir   -p  inst/lib/h2dl
+cp      -Rf tcl/* out/lib/h2dl
+cp      -Rf tcl/* inst/lib/h2dl
 
-                        } rfg3/build.sh
-                        exec chmod +x rfg3/build.sh
-
-                        ## Run Kit 
-                        #exec export KITCREATOR_PKGS="\$KITCREATOR_PKGS dev-tcl"
-                        exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS rfg3\"" >> env.bash
-                      
-                        #exec kitcreator
-                    }
-
-                    ## RFG 2 
-                    :do {
-                        ## Create folder dev-tcl
-                        if {![file exists rfg2]} {
-                            odfi::git::clone https://github.com/unihd-cag/odfi-rfg.git rfg2
-                        } else {
-                            odfi::git::pull rfg2
-                        }
-
-                        ## Create Build File 
-                        odfi::richstream::template::stringToFile {#!/bin/bash
-
-    ## 
-    mkdir   -p  out/lib/rfg2
-    mkdir   -p  inst/lib/rfg2
-    cp      -Rf tcl/* out/lib/rfg2
-    cp      -Rf tcl/* inst/lib/rfg2
-
-                        } rfg2/build.sh
-                        exec chmod +x rfg2/build.sh
+                        } h2dl/build.sh
+                        exec chmod +x h2dl/build.sh
 
                         ## Run Kit 
                         #exec export KITCREATOR_PKGS="\$KITCREATOR_PKGS dev-tcl"
-                        exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS rfg2\"" >> env.bash
-                      
-                        #exec kitcreator
-                    }
-                
+                        exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS h2dl\"" >> env.bash
 
+                    }
                 }
-                ## EOF Phase init 
 
-                ## Add CC Target
-                :config mingw64 {
+                ## RFG 
+                #########################
+                :config rfg {
 
                     :phase init {
 
+                        ## RFG 3
                         :do {
-                            set ::kitcreator "build/make-kit-win64 --enable-kit-storage=zip"
+
+
+                            ## Create folder
+                            if {![file exists rfg3]} {
+                                odfi::git::clone http://ipe-iperic-srv1.ipe.kit.edu:8082/adl/rfg3.git rfg3
+                            } else {
+                                odfi::git::pull rfg3
+                            }
+
+                            ## Create Build File 
+                            odfi::richstream::template::stringToFile {#!/bin/bash
+
+        ## 
+        mkdir   -p  out/lib/rfg3
+        mkdir   -p  inst/lib/rfg3
+        cp      -Rf tcl/* out/lib/rfg3
+        cp      -Rf tcl/* inst/lib/rfg3
+
+                            } rfg3/build.sh
+                            exec chmod +x rfg3/build.sh
+
+                            ## Run Kit 
+                            #exec export KITCREATOR_PKGS="\$KITCREATOR_PKGS dev-tcl"
+                            exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS rfg3\"" >> env.bash
+                          
+                            #exec kitcreator
                         }
 
-                    }
-
-                    :phase deploy {
-
+                        ## RFG 2 
                         :do {
-                            exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest.exe
+                            ## Create folder dev-tcl
+                            if {![file exists rfg2]} {
+                                odfi::git::clone https://github.com/unihd-cag/odfi-rfg.git rfg2
+                            } else {
+                                odfi::git::pull rfg2
+                            }
+
+                            ## Create Build File 
+                            odfi::richstream::template::stringToFile {#!/bin/bash
+
+        ## 
+        mkdir   -p  out/lib/rfg2
+        mkdir   -p  inst/lib/rfg2
+        cp      -Rf tcl/* out/lib/rfg2
+        cp      -Rf tcl/* inst/lib/rfg2
+
+                            } rfg2/build.sh
+                            exec chmod +x rfg2/build.sh
+
+                            ## Run Kit 
+                            #exec export KITCREATOR_PKGS="\$KITCREATOR_PKGS dev-tcl"
+                            exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS rfg2\"" >> env.bash
+                          
+                            #exec kitcreator
+                        }
+                    
+
+                    }
+                    ## EOF Phase init 
+
+                    ## Add CC Target
+                    :config mingw64 {
+
+                        :phase init {
+
+                            :requirements {
+                                :package "mingw-w64"
+                            }
+                            :do {
+                                set ::kitcreator "build/make-kit-win64 --enable-kit-storage=zip"
+                            }
+
+                        }
+
+                        :phase deploy {
+
+                            :do {
+                                exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest.exe
+                            }
                         }
                     }
+
                 }
-
+                ## EOF RFG
             }
+            ## EOF H2DL
+
+                
 
     
         
