@@ -9,7 +9,7 @@ set runKit {#!/bin/bash
 
 location="$(dirname "$(readlink -f ${BASH_SOURCE[0]})")"
 source $location/env.bash
-#./build/pre.sh
+./build/pre.sh
 ./<% return ${::kitcreator} %>
 }
 
@@ -22,7 +22,7 @@ odfi::powerbuild::config odfi {
         }
     }
 
-    :config tcl-kit {
+    :config tclkit {
 
         :object method addKitPackage name {
             exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS $name\"" >> env.bash
@@ -31,7 +31,8 @@ odfi::powerbuild::config odfi {
 
         :phase init {
             :requirements {
-                :package fossil
+                :package fossil 
+                :package autoconf
             }
 
             :do {   
@@ -76,7 +77,7 @@ odfi::powerbuild::config odfi {
         }
 
         ## Dev TCL 
-        :config dev-tcl {
+        :config dev_tcl {
 
             :phase init {
 
@@ -150,6 +151,28 @@ cp      -Rf tcl/* inst/lib/h2dl
                     }
                 }
 
+                ## Add CC Target
+                :config win64 {
+
+                    :phase init {
+
+                        :requirements {
+                            :package "mingw-w64"
+                        }
+                        :do {
+                            set ::kitcreator "build/make-kit-win64 --enable-kit-storage=zip"
+                        }
+
+                    }
+
+                    :phase deploy {
+
+                        :do {
+                            exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/h2dl-full-latest-win64.exe
+                        }
+                    }
+                }
+
                 ## RFG 
                 #########################
                 :config rfg {
@@ -219,7 +242,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                     ## EOF Phase init 
 
                     ## Add CC Target
-                    :config mingw64 {
+                    :config win64 {
 
                         :phase init {
 
@@ -235,7 +258,24 @@ cp      -Rf tcl/* inst/lib/h2dl
                         :phase deploy {
 
                             :do {
-                                exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest.exe
+                                exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-win64.exe
+                            }
+                        }
+                    }
+                    ## Add CC Target
+                    :config x86_64-gnu-linux {
+
+                        :phase init {
+
+                            :requirements {
+                                :package "gcc g++"
+                            }
+                        }
+
+                        :phase deploy {
+
+                            :do {
+                                exec scp tclkit-8.6.4 ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-x86_64-gnu-linux
                             }
                         }
                     }
@@ -260,4 +300,4 @@ cp      -Rf tcl/* inst/lib/h2dl
 
 }
 
-$odfi build *mingw64* package 
+$odfi build [join $argv] package 

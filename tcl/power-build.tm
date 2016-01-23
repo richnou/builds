@@ -13,7 +13,13 @@ namespace eval odfi::powerbuild {
             +expose name
 
             +method getFullName args {
-                return [:formatHierarchyString {$it name get} _]_[:name get]
+                if {[:isRoot]} {
+                    return [:name get]
+                } else {
+                    return [:formatHierarchyString {$it name get} -]-[:name get]
+                }
+            
+            
             }
             
 
@@ -56,7 +62,7 @@ namespace eval odfi::powerbuild {
 
                                 ## test 
                                 if {$state=="not installed"} {
-                                    if {[catch {exec sudo aptitude install [$package name get]}]} {
+                                    if {[catch {exec sudo aptitude -y install [$package name get]}]} {
                                         error "Could not install package [$package name get]"
                                     }
                                 } else {
@@ -98,6 +104,8 @@ namespace eval odfi::powerbuild {
                 odfi::log::info "Build Directory is $buildDirectory"
 
                 :shade odfi::powerbuild::Config walkDepthFirstPreorder {
+
+                    odfi::log::info "Testing node [$node getFullName]"
                     if {[string match $targetMatch [$node getFullName]]} {
                         
 
