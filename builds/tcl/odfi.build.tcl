@@ -13,6 +13,7 @@ source $location/env.bash
 ./<% return ${::kitcreator} %>
 }
 
+set tclVersion 8.6.4
 
 odfi::powerbuild::config odfi {
 
@@ -33,12 +34,13 @@ odfi::powerbuild::config odfi {
             :requirements {
                 :package fossil 
                 :package autoconf
+                :package make 
             }
 
             :do {   
 
                 ## Default Kit Creator command
-                set ::kitcreator kitcreator
+                set ::kitcreator "kitcreator ${::tclVersion}"
 
                 ## Get Kit Creator 
                 if {![file exists kitcreator.fossil]} {
@@ -56,13 +58,15 @@ odfi::powerbuild::config odfi {
                 exec touch env.bash
 
                 ## Init 
-                exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS tk\"" >> env.bash
+                exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS nsf\"" >> env.bash
                 exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS itcl\"" >> env.bash
 
             }
         }
 
         :phase compile {
+    
+
             :do {
                 odfi::log::info "Running kit creator with ${::kitcreator}"
                 #exec source env.bash && kitcreator
@@ -76,7 +80,31 @@ odfi::powerbuild::config odfi {
             }
         }
 
+        ## Add CC Target
+        :config win64 {
+
+            :phase init {
+
+                :requirements {
+                    :package "mingw-w64"
+                    :package "zip"
+                }
+                :do {
+                    set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                }
+
+            }
+
+            :phase deploy {
+
+                :do {
+                    exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/tclkit-${::tclVersion}-latest-win64.exe
+                }
+            }
+        }
+
         ## Dev TCL 
+        ###############################
         :config dev_tcl {
 
             :phase init {
@@ -115,6 +143,29 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
 
             :phase compile {
 
+            }
+
+            ## Add CC Target
+            :config win64 {
+
+                :phase init {
+
+                    :requirements {
+                        :package "mingw-w64"
+                        :package "zip"
+                    }
+                    :do {
+                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                    }
+
+                }
+
+                :phase deploy {
+
+                    :do {
+                        exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-win64.exe
+                    }
+                }
             }
 
             ## H2DL 
@@ -158,9 +209,10 @@ cp      -Rf tcl/* inst/lib/h2dl
 
                         :requirements {
                             :package "mingw-w64"
+                            :package "zip"
                         }
                         :do {
-                            set ::kitcreator "build/make-kit-win64 --enable-kit-storage=zip"
+                            set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
                         }
 
                     }
@@ -168,7 +220,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                     :phase deploy {
 
                         :do {
-                            exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/h2dl-full-latest-win64.exe
+                            exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/h2dl-full-latest-win64.exe
                         }
                     }
                 }
@@ -248,9 +300,10 @@ cp      -Rf tcl/* inst/lib/h2dl
 
                             :requirements {
                                 :package "mingw-w64"
+                                :package "zip"
                             }
                             :do {
-                                set ::kitcreator "build/make-kit-win64 --enable-kit-storage=zip"
+                                set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
                             }
 
                         }
@@ -258,7 +311,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                         :phase deploy {
 
                             :do {
-                                exec scp tclkit-8.6.4 rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-win64.exe
+                                exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-win64.exe
                             }
                         }
                     }
@@ -275,7 +328,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                         :phase deploy {
 
                             :do {
-                                exec scp tclkit-8.6.4 ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-x86_64-gnu-linux
+                                exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-x86_64-gnu-linux
                             }
                         }
                     }
@@ -300,4 +353,4 @@ cp      -Rf tcl/* inst/lib/h2dl
 
 }
 
-$odfi build [join $argv] package 
+$odfi build [lindex $argv 0] [lindex $argv 1] 

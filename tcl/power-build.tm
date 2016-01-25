@@ -125,6 +125,7 @@ namespace eval odfi::powerbuild {
                                 generate-sources
                                 compile 
                                 package
+                                deploy
                             }
                             foreach phase $phases {
                                 odfi::log::info "*** Entering Phase $phase ***"
