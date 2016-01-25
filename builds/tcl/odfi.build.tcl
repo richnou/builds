@@ -98,7 +98,7 @@ odfi::powerbuild::config odfi {
             :phase deploy {
 
                 :do {
-                    exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/tclkit-${::tclVersion}-latest-win64.exe
+                    exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/tclkit-${::tclVersion}-latest-win64.exe
                 }
             }
         }
@@ -163,7 +163,7 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
                 :phase deploy {
 
                     :do {
-                        exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-win64.exe
+                        exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-win64.exe
                     }
                 }
             }
@@ -220,7 +220,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                     :phase deploy {
 
                         :do {
-                            exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/h2dl-full-latest-win64.exe
+                            exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/h2dl-full-latest-win64.exe
                         }
                     }
                 }
@@ -311,7 +311,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                         :phase deploy {
 
                             :do {
-                                exec scp tclkit-${::tclVersion} rleys@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-win64.exe
+                                exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/rfg-full-latest-win64.exe
                             }
                         }
                     }
