@@ -177,9 +177,6 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
                         :package "mingw-w64"
                         :package "zip"
                     }
-                    :do {
-                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
-                    }
 
                 }
 
