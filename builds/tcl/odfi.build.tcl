@@ -168,6 +168,29 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
                 }
             }
 
+            ## Add CC Target
+            :config x86_64-gnu-linux {
+
+                :phase init {
+
+                    :requirements {
+                        :package "mingw-w64"
+                        :package "zip"
+                    }
+                    :do {
+                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                    }
+
+                }
+
+                :phase deploy {
+
+                    :do {
+                        exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-x86_64-gnu-linux.exe
+                    }
+                }
+            }
+
             ## H2DL 
             ##########
             :config h2dl {
