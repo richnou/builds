@@ -341,7 +341,8 @@ cp      -Rf tcl/* inst/lib/h2dl
                         :phase init {
 
                             :requirements {
-                                :package "gcc g++"
+                                :package gcc
+				:package g++
                             }
                         }
 
