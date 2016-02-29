@@ -58,6 +58,7 @@ odfi::powerbuild::config odfi {
                 exec touch env.bash
 
                 ## Init 
+                exec echo "export PATH=\"\$PATH:[pwd]/common/helpers\"" >> env.bash
                 exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS nsf\"" >> env.bash
                 exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS itcl\"" >> env.bash
 
@@ -257,7 +258,7 @@ cp      -Rf tcl/* inst/lib/h2dl
 
                             ## Create folder
                             if {![file exists rfg3]} {
-                                odfi::git::clone http://ipe-iperic-srv1.ipe.kit.edu:8082/adl/rfg3.git rfg3
+                                odfi::git::clone https://github.com/kit-adl/rfg3.git rfg3
                             } else {
                                 odfi::git::pull rfg3
                             }
@@ -323,7 +324,7 @@ cp      -Rf tcl/* inst/lib/h2dl
                                 :package "zip"
                             }
                             :do {
-                                set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                                set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
                             }
 
                         }
