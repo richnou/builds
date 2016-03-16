@@ -197,11 +197,16 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
 
                     :do {
 
-                        ## Create folder
+                        ## Create folders
                         if {![file exists h2dl]} {
                             odfi::git::clone git@github.com:richnou/h2dl.git h2dl
                         } else {
                             odfi::git::pull h2dl
+                        }
+                        if {![file exists odfi-dev-hw]} {
+                            odfi::git::clone git@github.com:unihd-cag/odfi-dev-hw.git dev-hw
+                        } else {
+                            odfi::git::pull dev-hw
                         }
 
                         ## Create Build File 
@@ -215,10 +220,22 @@ cp      -Rf tcl/* inst/lib/h2dl
 
                         } h2dl/build.sh
                         exec chmod +x h2dl/build.sh
+                        odfi::richstream::template::stringToFile {#!/bin/bash
+
+## 
+mkdir   -p  out/lib/dev-hw
+mkdir   -p  inst/lib/dev-hw
+cp      -Rf tcl/* out/lib/dev-hw
+cp      -Rf tcl/* inst/lib/dev-hw
+
+                        } dev-hw/build.sh
+
+
+                        exec chmod +x dev-hw/build.sh
 
                         ## Run Kit 
                         #exec export KITCREATOR_PKGS="\$KITCREATOR_PKGS dev-tcl"
-                        exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS h2dl\"" >> env.bash
+                        exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS h2dl dev-hw\"" >> env.bash
 
                     }
                 }
