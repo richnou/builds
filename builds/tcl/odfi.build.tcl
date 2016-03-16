@@ -91,7 +91,7 @@ odfi::powerbuild::config odfi {
                     :package "zip"
                 }
                 :do {
-                    set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                    set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
                 }
 
             }
@@ -156,7 +156,7 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
                         :package "zip"
                     }
                     :do {
-                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
                     }
 
                 }
@@ -250,7 +250,7 @@ cp      -Rf tcl/* inst/lib/dev-hw
                             :package "zip"
                         }
                         :do {
-                            set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=zip"
+                            set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
                         }
 
                     }
