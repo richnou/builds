@@ -101,12 +101,12 @@ namespace eval odfi::powerbuild {
                 ## prepare build folder 
                 set buildDirectory [pwd]/$buildDirectory
 
-                odfi::log::info "Build Directory is $buildDirectory"
+                odfi::log::info "Build Directory is $buildDirectory , with filter $targetMatch and phase $phase"
 
                 :shade odfi::powerbuild::Config walkDepthFirstPreorder {
 
                     odfi::log::info "Testing node [$node getFullName]"
-                    if {[string match $targetMatch [$node getFullName]]} {
+                    if {[string match *$targetMatch [$node getFullName]]} {
                         
 
                         ## Set Build Folder 
@@ -142,6 +142,71 @@ namespace eval odfi::powerbuild {
                 }
             }
         }
+    }
+    ## EOF Language 
+
+
+    proc execRead chan {
+        if {[eof $chan]} {
+            fileevent $chan readable {}
+            set odfi::powerbuild::eofexec true
+            #puts "In Exec eof channel "
+        } else {
+            #puts "In Exec read "
+            puts -nonewline [read $chan]
+            #puts "In Exec done "
+            if {[eof $chan]} {
+                fileevent $chan readable {}
+                set odfi::powerbuild::eofexec true
+               # puts "In Exec eof channel "
+            }
+        }
+        
+
+    }
+
+    ##
+    proc exec args {
+
+
+        set monitorProcess [open "|$args 2>@1" r]
+        fconfigure $monitorProcess -blocking 0
+
+        puts "Setup file event"
+        fileevent $monitorProcess readable  [list odfi::powerbuild::execRead $monitorProcess]
+        vwait odfi::powerbuild::eofexec
+
+        catch {close $monitorProcess}
+        return 0
+
+##############################
+        ## Open file using pipe
+        set f [open ptmp {RDWR CREAT}]
+        fconfigure $f  -blocking 0 -buffering line
+        #fconfigure $f  -blocking 0
+        puts "Setup file event $args"
+        fileevent $f readable  [list odfi::powerbuild::execRead $f]
+
+        #catch {::exec $args >@$f 2>@$f & }
+        #vwait forever
+
+        catch {puts [::exec [split $args]] }
+
+        close $f
+
+        return 
+##############################
+
+
+        
+
+
+##############################
+        ## exec 
+        catch {exec $args >@$monitorfile}
+
+        close $monitorfile
+
     }
 
 
