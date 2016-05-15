@@ -343,6 +343,101 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
 
     }
 
+    :config h2dl-indesign {
+
+        :phase init {
+
+            :requirements {
+                :package maven 
+            }
+
+            :do {
+                ## Create folder dev-tcl
+                puts "INit iverilog from [pwd]"
+                if {![file exists h2dl]} {
+                    odfi::powerbuild::exec git clone -- https://github.com/richnou/h2dl.git
+                } else {
+                    odfi::git::pull h2dl
+                }
+            }
+        }
+
+        :config x86_64-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd h2dl
+                    
+                }
+            }
+        }
+
+        :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                    cd h2dl/indesign
+                    
+                }
+            }
+        }
+
+
+        :phase compile {
+            :do {
+            
+                odfi::powerbuild::exec mvn package
+               
+            }
+        }
+        :phase deploy {
+            :do {
+                
+                exec cp -vf target/h2dl-module-0.0.1-SNAPSHOT-shaded.jar $output/bin/h2dl-analyse.jar
+             
+            }
+        }
+
+    }
+
+    :config odfi {
+
+        :config x86_64-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+                    
+                }
+            }
+        }
+
+        :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+                    
+                }
+            }
+        }
+
+        :phase deploy {
+            :do {
+
+            }
+        }
+
+    }
+
 }
 
 $verilogtc build [lindex $argv 0] [lindex $argv 1] 
