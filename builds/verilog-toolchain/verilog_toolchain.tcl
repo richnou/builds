@@ -7,11 +7,12 @@ package require odfi::richstream 3.0.0
 
 puts "Hello"
 
+set baseLocation [file normalize [file dirname [info script]]]
 set targetPlatform [exec gcc -dumpmachine]
 
 ## Prepare output folder for all
-set output [file normalize [file dirname [info script]]/build-$targetPlatform]
-file mkdir $output
+set outputBase [file normalize [file dirname [info script]]/build]
+
 
 proc bgerror {message} {
     set timestamp [clock format [clock seconds]]
@@ -29,7 +30,8 @@ odfi::powerbuild::config verilogtc {
 
             :do {
               puts "Puts inside folder: [pwd]"  
-              odfi::powerbuild::exec wget http://prdownloads.sourceforge.net/tcl/tcl8.6.5-src.tar.gz
+              #odfi::powerbuild::exec wget http://prdownloads.sourceforge.net/tcl/tcl8.6.5-src.tar.gz
+              odfi::powerbuild::exec cp $baseLocation/packages/tcl8.6.5-src.tar.gz .
               odfi::powerbuild::exec tar xvzf tcl8.6.5-src.tar.gz
             }
         }
@@ -37,12 +39,19 @@ odfi::powerbuild::config verilogtc {
         :config x86_64-w64-mingw32 {
             :phase init {
                 :do {
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
                     cd tcl8.6.5/win
                     set localpwd [::exec pwd]
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
 
-                    odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+                    odfi::files::writeToFile $output/share/config.site "
+test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\"
+test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
+"
 
                     #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
                     odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
@@ -55,12 +64,32 @@ odfi::powerbuild::config verilogtc {
         :config i686-w64-mingw32 {
             :phase init {
                 :do {
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
                     cd tcl8.6.5/win
                     set localpwd [::exec pwd]
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
 
                     odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+
+                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    odfi::powerbuild::exec sh configure  --prefix=$output
+                }
+            }
+        }
+
+        :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                    cd tcl8.6.5/unix
+                    set localpwd [::exec pwd]
 
                     #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
                     odfi::powerbuild::exec sh configure  --prefix=$output
@@ -119,6 +148,21 @@ odfi::powerbuild::config verilogtc {
            
         }
 
+        :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                    cd ghdl
+
+                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    odfi::powerbuild::exec sh configure  --prefix=$output --with-llvm-config
+                }
+            }
+        }
+
         :phase compile {
             :do {
                 odfi::powerbuild::exec  make -j4
@@ -138,6 +182,12 @@ odfi::powerbuild::config verilogtc {
 
         :phase init {
 
+            :requirements {
+                :package flex 
+                :package bison
+                :package gperf
+            }
+
             :do {
                 ## Create folder dev-tcl
                 puts "INit iverilog from [pwd]"
@@ -152,6 +202,11 @@ odfi::powerbuild::config verilogtc {
         :config x86_64-w64-mingw32 {
             :phase init {
                 :do {
+
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
                     cd iverilog
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
@@ -166,16 +221,34 @@ odfi::powerbuild::config verilogtc {
            
         }
 
+        :config x86_64-pc-linux-gnu  {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                    cd iverilog
+                    
+                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    odfi::powerbuild::exec sh autoconf.sh
+                    odfi::powerbuild::exec sh configure --prefix=$output
+                }
+            }
+
+           
+        }
+
         :phase compile {
             :do {
-                cd iverilog
+   
                 odfi::powerbuild::exec  make -j4
             }
         }
 
         :phase deploy {
              :do {
-                cd iverilog
+   
                 odfi::powerbuild::exec  make install
             }
         }

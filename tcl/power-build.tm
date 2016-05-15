@@ -1,6 +1,7 @@
 package provide odfi::powerbuild 1.0.0
 package require odfi::language 1.0.0
 package require odfi::log 1.0.0
+package require odfi::os 
 
 namespace eval odfi::powerbuild {
 
@@ -52,22 +53,34 @@ namespace eval odfi::powerbuild {
                         $it shade odfi::powerbuild::Package eachChild {
                             {package i} => 
 
-                                odfi::log::info "Package requirement [$package name get]"
-                                set res [exec aptitude show [$package name get]]
+                                switch -glob -- "[odfi::os::getOs]" {
 
-                                ## Look for state 
-                                #puts "res $res"
-                                regexp -line {^State:\s+(.+)$} $res -> state
-                                odfi::log::info "State $state"
+                                    linux.debian {
+                                        odfi::log::info "Package requirement [$package name get]"
+                                        set res [exec aptitude show [$package name get]]
 
-                                ## test 
-                                if {$state=="not installed"} {
-                                    if {[catch {exec sudo aptitude -y install [$package name get]}]} {
-                                        error "Could not install package [$package name get]"
+                                        ## Look for state 
+                                        #puts "res $res"
+                                        regexp -line {^State:\s+(.+)$} $res -> state
+                                        odfi::log::info "State $state"
+
+                                        ## test 
+                                        if {$state=="not installed"} {
+                                            if {[catch {exec sudo aptitude -y install [$package name get]}]} {
+                                                error "Could not install package [$package name get]"
+                                            }
+                                        } else {
+                                            odfi::log::info "Package present"
+                                        }
                                     }
-                                } else {
-                                    odfi::log::info "Package present"
+
+                                    linux.arch {
+                                        #::odfi::powerbuild::exec sudo pacman -S [$package name get]
+                                        
+                                    }
                                 }
+
+                                
 
                         }
                     }
