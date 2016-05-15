@@ -64,6 +64,24 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                 }
             }
 
+            phase compile {
+                :do {
+                    cd ../../tcl8.6.5/win
+                    odfi::powerbuild::exec  make -j4
+                    cd ../../tk8.6.5/win
+                    odfi::powerbuild::exec  make -j4
+                }
+            }
+
+            :phase deploy {
+                 :do {
+                    cd ../../tcl8.6.5/win
+                    odfi::powerbuild::exec  make install 
+                    cd ../../tk8.6.5/win
+                    odfi::powerbuild::exec  make install
+                }
+            }
+
             
         }
 
@@ -90,6 +108,23 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     odfi::powerbuild::exec sh configure  --prefix=$output
                 }
             }
+            phase compile {
+                :do {
+                    cd ../../tcl8.6.5/win
+                    odfi::powerbuild::exec  make -j4
+                    cd ../../tk8.6.5/win
+                    odfi::powerbuild::exec  make -j4
+                }
+            }
+
+            :phase deploy {
+                 :do {
+                    cd ../../tcl8.6.5/win
+                    odfi::powerbuild::exec  make install 
+                    cd ../../tk8.6.5/win
+                    odfi::powerbuild::exec  make install
+                }
+            }
         }
 
         :config x86_64-pc-linux-gnu {
@@ -99,32 +134,34 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     set ::output ${outputBase}-x86_64-pc-linux-gnu
                     file mkdir ${::output}
 
-                    cd tcl8.6.5/win
+                    cd tcl8.6.5/unix
                     odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
 
-                    cd ../../tk8.6.5/win
+                    cd ../../tk8.6.5/unix
                     odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
+                }
+            }
+
+            :phase compile {
+                :do {
+                    cd ../../tcl8.6.5/unix
+                    odfi::powerbuild::exec  make -j4
+                    cd ../../tk8.6.5/unix
+                    odfi::powerbuild::exec  make -j4
+                }
+            }
+
+            :phase deploy {
+                 :do {
+                    cd ../../tcl8.6.5/unix
+                    odfi::powerbuild::exec  make install 
+                    cd ../../tk8.6.5/unix
+                    odfi::powerbuild::exec  make install
                 }
             }
         }
 
-        :phase compile {
-            :do {
-                cd ../../tcl8.6.5/win
-                odfi::powerbuild::exec  make -j4
-                cd ../../tk8.6.5/win
-                odfi::powerbuild::exec  make -j4
-            }
-        }
-
-        :phase deploy {
-             :do {
-                cd ../../tcl8.6.5/win
-                odfi::powerbuild::exec  make install 
-                cd ../../tk8.6.5/win
-                odfi::powerbuild::exec  make install
-            }
-        }
+        
     }
 
     :config gtkwave {
@@ -157,6 +194,15 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                 }
             }
 
+            :phase deploy {
+                :do {
+                    set gccLoc [::exec which gcc]
+                    set dirLoc [::exec dirname $gccLoc]
+                    catch {::exec cp -f $dirLoc/*.dll $output/bin/}
+                    catch {::exec cp -f /usr/x86_64-w64-mingw32/bin/*.dll $output/bin/}
+                }
+            }
+
            
         }
 
@@ -185,9 +231,8 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
         :phase deploy {
              :do {
                 odfi::powerbuild::exec  make install
-                set gccLoc [::exec which gcc]
-                set dirLoc [::exec dirname $gccLoc]
-                ::exec cp -f $dirLoc/*.dll $output/bin/
+
+                
             }
         }
     }
