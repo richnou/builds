@@ -64,7 +64,7 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                 }
             }
 
-            phase compile {
+            :phase compile {
                 :do {
                     cd ../../tcl8.6.5/win
                     odfi::powerbuild::exec  make -j4
@@ -108,7 +108,7 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     odfi::powerbuild::exec sh configure  --prefix=$output
                 }
             }
-            phase compile {
+            :phase compile {
                 :do {
                     cd ../../tcl8.6.5/win
                     odfi::powerbuild::exec  make -j4
@@ -431,6 +431,14 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     
                 }
             }
+            :phase deploy {
+                :do {
+                    
+                    catch {exec cp -vf src/main/scripts/hdl-analyse.bash $output/}
+                 
+                }
+            }
+
         }
 
 
