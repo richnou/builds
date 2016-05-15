@@ -24,7 +24,7 @@ interp bgerror {} bgerror
 
 odfi::powerbuild::config verilogtc {
 
-    :config tcl {
+    :config tcltk {
 
         :phase init {
 
@@ -33,6 +33,9 @@ odfi::powerbuild::config verilogtc {
               #odfi::powerbuild::exec wget http://prdownloads.sourceforge.net/tcl/tcl8.6.5-src.tar.gz
               odfi::powerbuild::exec cp $baseLocation/packages/tcl8.6.5-src.tar.gz .
               odfi::powerbuild::exec tar xvzf tcl8.6.5-src.tar.gz
+
+              odfi::powerbuild::exec cp $baseLocation/packages/tk8.6.5-src.tar.gz .
+              odfi::powerbuild::exec tar xvzf tk8.6.5-src.tar.gz
             }
         }
 
@@ -43,17 +46,20 @@ odfi::powerbuild::config verilogtc {
                     set ::output ${outputBase}-x86_64-w64-mingw32
                     file mkdir ${::output}
 
-                    cd tcl8.6.5/win
+                    
                     set localpwd [::exec pwd]
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
-
                     odfi::files::writeToFile $output/share/config.site "
 test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\"
 test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
 "
 
                     #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    cd tcl8.6.5/win
+                    odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
+
+                    cd ../../tk8.6.5/win
                     odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
                 }
             }
@@ -68,7 +74,7 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     set ::output ${outputBase}-i686-w64-mingw32
                     file mkdir ${::output}
 
-                    cd tcl8.6.5/win
+                    
                     set localpwd [::exec pwd]
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
@@ -76,6 +82,11 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
                     #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    
+                    cd tcl8.6.5/win
+                    odfi::powerbuild::exec sh configure --prefix=$output
+
+                    cd ../../tk8.6.5/win
                     odfi::powerbuild::exec sh configure  --prefix=$output
                 }
             }
@@ -88,59 +99,60 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     set ::output ${outputBase}-x86_64-pc-linux-gnu
                     file mkdir ${::output}
 
-                    cd tcl8.6.5/unix
-                    set localpwd [::exec pwd]
+                    cd tcl8.6.5/win
+                    odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
 
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
-                    odfi::powerbuild::exec sh configure  --prefix=$output
+                    cd ../../tk8.6.5/win
+                    odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
                 }
             }
         }
 
         :phase compile {
             :do {
-                #cd tcl8.6.5/win
+                cd ../../tcl8.6.5/win
+                odfi::powerbuild::exec  make -j4
+                cd ../../tk8.6.5/win
                 odfi::powerbuild::exec  make -j4
             }
         }
 
         :phase deploy {
              :do {
-                #cd tcl8.6.5/win
+                cd ../../tcl8.6.5/win
+                odfi::powerbuild::exec  make install 
+                cd ../../tk8.6.5/win
                 odfi::powerbuild::exec  make install
             }
         }
     }
 
     :config gtkwave {
-
-    }
-
-    :config ghdl {
         :phase init {
 
             :do {
-                ## Create folder dev-tcl
-                puts "INit iverilog from [pwd]"
-                if {![file exists iverilog]} {
-                    odfi::powerbuild::exec git clone https://github.com/tgingold/ghdl.git ghdl
-                } else {
-                    odfi::git::pull ghdl
-                }
+              puts "Puts inside folder: [pwd]"  
+              #odfi::powerbuild::exec wget http://prdownloads.sourceforge.net/tcl/tcl8.6.5-src.tar.gz
+              odfi::powerbuild::exec cp $baseLocation/packages/gtkwave-3.3.72.tar.gz .
+              odfi::powerbuild::exec tar xvzf gtkwave-3.3.72.tar.gz
             }
         }
 
-
         :config x86_64-w64-mingw32 {
+
             :phase init {
                 :do {
-                    cd ghdl
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd gtkwave-3.3.72
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
                     odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
                     #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
-                    odfi::powerbuild::exec sh configure --prefix=$output --with-llvm-config
+                    odfi::powerbuild::exec sh configure --without-gconf --prefix=$output   
 
                 }
             }
@@ -155,10 +167,11 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     set ::output ${outputBase}-x86_64-pc-linux-gnu
                     file mkdir ${::output}
 
-                    cd ghdl
+                    cd gtkwave-3.3.72
 
                     #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
-                    odfi::powerbuild::exec sh configure  --prefix=$output --with-llvm-config
+                    odfi::powerbuild::exec sh autogen.sh
+                    odfi::powerbuild::exec sh configure  --prefix=$output 
                 }
             }
         }
@@ -172,6 +185,81 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
         :phase deploy {
              :do {
                 odfi::powerbuild::exec  make install
+                set gccLoc [::exec which gcc]
+                set dirLoc [::exec dirname $gccLoc]
+                ::exec cp -f $dirLoc/*.dll $output/bin/
+            }
+        }
+    }
+
+    :config ghdl {
+        :phase init {
+
+            :do {
+                ## Create folder dev-tcl
+                #puts "INit iverilog from [pwd]"
+                #if {![file exists iverilog]} {
+               #     odfi::powerbuild::exec git clone https://github.com/tgingold/ghdl.git ghdl
+               # } else {
+                #    odfi::git::pull ghdl
+                #}
+                
+            }
+        }
+
+
+        :config x86_64-w64-mingw32 {
+            :phase init {
+                :do {
+
+
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
+                    odfi::powerbuild::exec cp $baseLocation/packages/ghdl-0.33-win32.zip .
+                    odfi::powerbuild::exec unzip -fuo ghdl-0.33-win32.zip
+                    odfi::powerbuild::exec cp -Rfv ghdl-0.33/* $output 
+
+                    #cd ghdl
+                    #::exec mkdir -p $output/share/
+                    #::exec rm -f $output/share/config.site
+                    #odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+
+                    # odfi::powerbuild::exec sh configure --prefix=$output --with-llvm-config
+
+                }
+            }
+
+           
+        }
+
+        :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                    odfi::powerbuild::exec cp $baseLocation/packages/ghdl-0.33-x86_64-linux.tgz .
+                    odfi::powerbuild::exec tar xvzf ghdl-0.33-x86_64-linux.tgz
+                    odfi::powerbuild::exec cp -Rfv ghdl-0.33/* $output 
+
+                    #cd ghdl
+                    #odfi::powerbuild::exec sh configure  --prefix=$output --with-llvm-config
+                }
+            }
+        }
+
+        :phase compile {
+            :do {
+                #odfi::powerbuild::exec  make -j4
+            }
+        }
+
+        :phase deploy {
+             :do {
+                #odfi::powerbuild::exec  make install
             }
         }
 
