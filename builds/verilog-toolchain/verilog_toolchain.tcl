@@ -749,8 +749,8 @@ odfi::powerbuild::config verilogtc {
                     file mkdir ${::output}
 
                     cd ${::output}
-                    odfi::powerbuild::exec echo "inside `pwd`"
-                    odfi::powerbuild::exec tar -zcvf ../hdl-tc-x86_64-w64-mingw32.tar.gz * 
+                    cd ..
+                    odfi::powerbuild::exec tar -zcvf hdl-tc-x86_64-w64-mingw32.tar.gz hdl-tc-x86_64-w64-mingw32
 
                 }
             }
