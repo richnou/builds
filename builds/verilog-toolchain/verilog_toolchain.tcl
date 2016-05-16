@@ -777,6 +777,14 @@ odfi::powerbuild::config verilogtc {
 
                 }
             }
+
+            :phase deploy {
+                :do {
+                    cd ${::output}
+                    cd ..
+                    odfi::powerbuild::exec rsync -v hdl-tc-x86_64-pc-linux-gnu.tar.gz  ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/adl/
+                }
+            }
         }
 
     }
