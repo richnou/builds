@@ -8,7 +8,7 @@ package require odfi::richstream 3.0.0
 puts "Hello"
 
 set baseLocation [file normalize [file dirname [info script]]]
-set targetPlatform [exec gcc -dumpmachine]
+#set targetPlatform [exec gcc -dumpmachine]
 
 ## Prepare output folder for all
 set outputBase [file normalize [file dirname [info script]]/build]
@@ -23,6 +23,8 @@ interp bgerror {} bgerror
 
 
 odfi::powerbuild::config verilogtc {
+
+    
 
     :config tcltk {
 
@@ -50,12 +52,12 @@ odfi::powerbuild::config verilogtc {
                     set localpwd [::exec pwd]
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
-                    odfi::files::writeToFile $output/share/config.site "
-test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\"
-test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
-"
+                    #odfi::files::writeToFile $output/share/config.site "
+#test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\"
+#test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
+#"
 
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                  
                     cd tcl8.6.5/win
                     odfi::powerbuild::exec sh configure --enable-64bit --prefix=$output
 
@@ -97,9 +99,9 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
 
-                    odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+                    #odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                 
                     
                     cd tcl8.6.5/win
                     odfi::powerbuild::exec sh configure --prefix=$output
@@ -163,6 +165,96 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
 
         
     }
+    ## EOF TCL TK
+
+    :config nsf {
+
+        :phase init {
+
+            :do {
+                odfi::powerbuild::exec cp $baseLocation/packages/nsf2.0.0.tar.gz .
+                odfi::powerbuild::exec tar xvzf nsf2.0.0.tar.gz
+            }
+        }
+
+        :config x86_64-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
+                    
+                    set localpwd [::exec pwd]
+                    ::exec mkdir -p $output/share/
+                    ::exec rm -f $output/share/config.site
+                    #odfi::files::writeToFile $output/share/config.site "
+#test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\"
+#test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
+#"
+
+                   
+                    cd nsf2.0.0
+                    odfi::powerbuild::exec sh configure --prefix=$output
+
+                 }
+            }
+        }
+
+        :config i686-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
+                    
+                    set localpwd [::exec pwd]
+                    ::exec mkdir -p $output/share/
+                    ::exec rm -f $output/share/config.site
+                    #odfi::files::writeToFile $output/share/config.site "
+#test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\"
+#test -z \"\$CC\" && CC=\"i686-w64-mingw32-gcc\"
+#"
+
+                   
+                    cd nsf2.0.0
+                    odfi::powerbuild::exec sh configure --prefix=$output
+
+                 }
+            }
+        }
+
+         :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                     cd nsf2.0.0
+                     odfi::powerbuild::exec sh configure --prefix=$output
+
+                 }
+            }
+        }
+
+
+
+        :phase compile {
+            :do {
+                odfi::powerbuild::exec  make -j4  
+            }
+        }
+
+        :phase deploy {
+             :do {
+                odfi::powerbuild::exec  make install
+            }
+        }
+
+    }
+    ## EOF NSF
 
     :config gtkwave {
         :phase init {
@@ -186,9 +278,9 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     cd gtkwave-3.3.72
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
-                    odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+                   # odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                  
                     odfi::powerbuild::exec sh configure --without-gconf --prefix=$output   
 
                 }
@@ -206,6 +298,37 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
            
         }
 
+        :config i686-w64-mingw32 {
+
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd gtkwave-3.3.72
+                    ::exec mkdir -p $output/share/
+                    ::exec rm -f $output/share/config.site
+                    ##odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-LC:/msys64/mingw32/bin -static-libgcc -static-libstdc++ -static -lstdc++\""
+
+                   
+                    odfi::powerbuild::exec sh configure --without-gconf --prefix=$output   
+
+                }
+            }
+
+            :phase deploy {
+                :do {
+                    set gccLoc [::exec which gcc]
+                    set dirLoc [::exec dirname $gccLoc]
+                    catch {::exec cp -f $dirLoc/*.dll $output/bin/}
+                    catch {::exec cp -f /usr/i686-w64-mingw32/bin/*.dll $output/bin/}
+                }
+            }
+
+           
+        }
+
         :config x86_64-pc-linux-gnu {
             :phase init {
                 :do {
@@ -215,7 +338,7 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
 
                     cd gtkwave-3.3.72
 
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                   
                     odfi::powerbuild::exec sh autogen.sh
                     odfi::powerbuild::exec sh configure  --prefix=$output 
                 }
@@ -272,6 +395,25 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     #odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
                     # odfi::powerbuild::exec sh configure --prefix=$output --with-llvm-config
+
+                }
+            }
+
+           
+        }
+
+        :config i686-w64-mingw32 {
+            :phase init {
+                :do {
+
+
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
+                    odfi::powerbuild::exec cp $baseLocation/packages/ghdl-0.33-win32.zip .
+                    odfi::powerbuild::exec unzip -fuo ghdl-0.33-win32.zip
+                    odfi::powerbuild::exec cp -Rfv ghdl-0.33/* $output 
 
                 }
             }
@@ -343,9 +485,31 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     cd iverilog
                     ::exec mkdir -p $output/share/
                     ::exec rm -f $output/share/config.site
-                    odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+                    #odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    
+                    odfi::powerbuild::exec sh autoconf.sh
+                    odfi::powerbuild::exec sh configure --prefix=$output
+                }
+            }
+
+           
+        }
+
+        :config i686-w64-mingw32 {
+            :phase init {
+                :do {
+
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd iverilog
+                    ::exec mkdir -p $output/share/
+                    ::exec rm -f $output/share/config.site
+                    #odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
+
+                    
                     odfi::powerbuild::exec sh autoconf.sh
                     odfi::powerbuild::exec sh configure --prefix=$output
                 }
@@ -363,7 +527,7 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
 
                     cd iverilog
                     
-                    #::exec echo test -z "\$LDFLAGS" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\" > $output/share/config.site
+                    
                     odfi::powerbuild::exec sh autoconf.sh
                     odfi::powerbuild::exec sh configure --prefix=$output
                 }
@@ -383,6 +547,70 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
              :do {
    
                 odfi::powerbuild::exec  make install
+            }
+        }
+
+    }
+
+    
+
+    :config odfi {
+
+        :config x86_64-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+                    
+                }
+            }
+        }
+
+        :config i686-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+                    
+                }
+            }
+        }
+
+        :config x86_64-pc-linux-gnu {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+                    
+                }
+            }
+        }
+
+        :phase deploy {
+            :do {
+
+                ## Manager
+                ##############
+                if {![file exists $output/odfi]} {
+                    odfi::powerbuild::exec git clone -- https://github.com/richnou/odfi-manager.git $output/odfi
+                } else {
+                    odfi::git::pull $output/odfi
+                }
+
+                odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --update
+                odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.dev-tcl
+                odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.h2dl 
+                odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.dev-hw
+
+                if {![file exists $output/odfi/install/h2dl]} {
+                    odfi::powerbuild::exec git clone -- https://github.com/richnou/h2dl.git $output/odfi/install/h2dl
+                } else {
+                    odfi::git::pull $output/odfi/install/h2dl
+                }
+
             }
         }
 
@@ -414,8 +642,35 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                     set ::output ${outputBase}-x86_64-w64-mingw32
                     file mkdir ${::output}
 
-                    cd h2dl
+                    cd h2dl/indesign
                     
+                }
+            }
+            :phase deploy {
+                :do {
+                    
+                    catch {exec cp -vf src/main/scripts/hdl-analyse.bat $output/}
+                 
+                }
+            }
+        }
+
+        :config i686-w64-mingw32 {
+            :phase init {
+                :do {
+
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd h2dl/indesign
+                    
+                }
+            }
+            :phase deploy {
+                :do {
+                    
+                    catch {exec cp -vf src/main/scripts/hdl-analyse.bat $output/}
+                 
                 }
             }
         }
@@ -454,38 +709,6 @@ test -z \"\$CC\" && CC=\"x86_64-w64-mingw32-gcc\"
                 
                 exec cp -vf target/h2dl-module-0.0.1-SNAPSHOT-shaded.jar $output/bin/h2dl-analyse.jar
              
-            }
-        }
-
-    }
-
-    :config odfi {
-
-        :config x86_64-w64-mingw32 {
-            :phase init {
-                :do {
-
-                    set ::output ${outputBase}-x86_64-w64-mingw32
-                    file mkdir ${::output}
-                    
-                }
-            }
-        }
-
-        :config x86_64-pc-linux-gnu {
-            :phase init {
-                :do {
-
-                    set ::output ${outputBase}-x86_64-pc-linux-gnu
-                    file mkdir ${::output}
-                    
-                }
-            }
-        }
-
-        :phase deploy {
-            :do {
-
             }
         }
 
