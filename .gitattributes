@@ -2,3 +2,10 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.tar.gz filter=lfs diff=lfs merge=lfs -text
 *.tgz filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/download.htm filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/ghdl-0.33-win32.zip filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/ghdl-0.33-x86_64-linux.tgz filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/gtkwave-3.3.72.tar.gz filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/nsf2.0.0.tar.gz filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/tcl8.6.5-src.tar.gz filter=lfs diff=lfs merge=lfs -text
+builds/verilog-toolchain/packages/tk8.6.5-src.tar.gz filter=lfs diff=lfs merge=lfs -text
