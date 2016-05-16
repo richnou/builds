@@ -5,13 +5,18 @@ source ../../tcl/power-build.tm
 package require odfi::git 2.0.0
 package require odfi::richstream 3.0.0
 
-puts "Hello"
+puts "Hello: $env(PATH)"
+puts "MVN: [exec which mvn]"
+#exec sh [exec which mvn]
+#exit 0
 
 set baseLocation [file normalize [file dirname [info script]]]
 #set targetPlatform [exec gcc -dumpmachine]
 
 ## Prepare output folder for all
 set outputBase [file normalize [file dirname [info script]]/build]
+
+
 
 
 proc bgerror {message} {
@@ -75,7 +80,7 @@ odfi::powerbuild::config verilogtc {
                 }
             }
 
-            :phase deploy {
+            :phase package {
                  :do {
                     cd ../../tcl8.6.5/win
                     odfi::powerbuild::exec  make install 
@@ -119,7 +124,7 @@ odfi::powerbuild::config verilogtc {
                 }
             }
 
-            :phase deploy {
+            :phase package {
                  :do {
                     cd ../../tcl8.6.5/win
                     odfi::powerbuild::exec  make install 
@@ -153,7 +158,7 @@ odfi::powerbuild::config verilogtc {
                 }
             }
 
-            :phase deploy {
+            :phase package {
                  :do {
                     cd ../../tcl8.6.5/unix
                     odfi::powerbuild::exec  make install 
@@ -247,7 +252,7 @@ odfi::powerbuild::config verilogtc {
             }
         }
 
-        :phase deploy {
+        :phase package {
              :do {
                 odfi::powerbuild::exec  make install
             }
@@ -290,7 +295,7 @@ odfi::powerbuild::config verilogtc {
                 }
             }
 
-            :phase deploy {
+            :phase package {
                 :do {
                     set gccLoc [::exec which gcc]
                     set dirLoc [::exec dirname $gccLoc]
@@ -321,7 +326,7 @@ odfi::powerbuild::config verilogtc {
                 }
             }
 
-            :phase deploy {
+            :phase package {
                 :do {
                     set gccLoc [::exec which gcc]
                     set dirLoc [::exec dirname $gccLoc]
@@ -355,7 +360,7 @@ odfi::powerbuild::config verilogtc {
             }
         }
 
-        :phase deploy {
+        :phase package {
              :do {
                 odfi::powerbuild::exec  make install
 
@@ -448,7 +453,7 @@ odfi::powerbuild::config verilogtc {
             }
         }
 
-        :phase deploy {
+        :phase package {
              :do {
                 #odfi::powerbuild::exec  make install
             }
@@ -547,7 +552,7 @@ odfi::powerbuild::config verilogtc {
             }
         }
 
-        :phase deploy {
+        :phase package {
              :do {
    
                 odfi::powerbuild::exec  make install
@@ -593,7 +598,7 @@ odfi::powerbuild::config verilogtc {
             }
         }
 
-        :phase deploy {
+        :phase package {
             :do {
 
                 ## Manager
@@ -606,7 +611,7 @@ odfi::powerbuild::config verilogtc {
 
                 odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --update
                 odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.dev-tcl
-                odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.h2dl 
+                #odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.h2dl 
                 odfi::powerbuild::exec tclsh $output/odfi/bin/odfi --install local.dev-hw
 
                 if {![file exists $output/odfi/install/h2dl]} {
@@ -650,7 +655,7 @@ odfi::powerbuild::config verilogtc {
                     
                 }
             }
-            :phase deploy {
+            :phase package {
                 :do {
                     
                     catch {exec cp -vf src/main/scripts/hdl-analyse.bat $output/}
@@ -670,7 +675,7 @@ odfi::powerbuild::config verilogtc {
                     
                 }
             }
-            :phase deploy {
+            :phase package {
                 :do {
                     
                     catch {exec cp -vf src/main/scripts/hdl-analyse.bat $output/}
@@ -690,7 +695,7 @@ odfi::powerbuild::config verilogtc {
                     
                 }
             }
-            :phase deploy {
+            :phase package {
                 :do {
                     
                     catch {exec cp -vf src/main/scripts/hdl-analyse.bash $output/}
@@ -704,15 +709,49 @@ odfi::powerbuild::config verilogtc {
         :phase compile {
             :do {
             
-                odfi::powerbuild::exec mvn -U package
-               
+                set mvnpath [::exec which mvn]
+                puts "MVN Path: $mvnpath"
+                odfi::powerbuild::exec sh $mvnpath -U package
+                
             }
         }
-        :phase deploy {
+        :phase package {
             :do {
                 
                 exec cp -vf target/h2dl-module-0.0.1-SNAPSHOT-shaded.jar $output/bin/h2dl-analyse.jar
              
+            }
+        }
+
+    }
+
+    :config finish {
+
+        :config i686-w64-mingw32 {
+
+            :phase package {
+                :do {
+                    set ::output ${outputBase}-i686-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd ${::output}
+                    odfi::powerbuild::exec tar -zcvf ../hdl-tc-i686-w64-mingw32.tar.gz * 
+
+                }
+            }
+        }
+
+        :config x86_64-w64-mingw32 {
+
+            :phase package {
+                :do {
+                    set ::output ${outputBase}-x86_64-w64-mingw32
+                    file mkdir ${::output}
+
+                    cd ${::output}
+                    odfi::powerbuild::exec tar -zcvf ../hdl-tc-x86_64-w64-mingw32.tar.gz * 
+
+                }
             }
         }
 
