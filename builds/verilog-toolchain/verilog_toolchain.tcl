@@ -14,7 +14,7 @@ set baseLocation [file normalize [file dirname [info script]]]
 #set targetPlatform [exec gcc -dumpmachine]
 
 ## Prepare output folder for all
-set outputBase [file normalize [file dirname [info script]]/build]
+set outputBase [file normalize [file dirname [info script]]/hdl-tc]
 
 
 
@@ -349,7 +349,7 @@ odfi::powerbuild::config verilogtc {
 
                    
                     odfi::powerbuild::exec sh autogen.sh
-                    odfi::powerbuild::exec sh configure  --prefix=$output 
+                    odfi::powerbuild::exec sh configure  --disable-xz --prefix=$output 
                 }
             }
         }
@@ -750,6 +750,30 @@ odfi::powerbuild::config verilogtc {
 
                     cd ${::output}
                     odfi::powerbuild::exec tar -zcvf ../hdl-tc-x86_64-w64-mingw32.tar.gz * 
+
+                }
+            }
+        }
+
+        :config x86_64-pc-linux-gnu {
+
+            :phase package {
+                :do {
+                    set ::output ${outputBase}-x86_64-pc-linux-gnu
+                    file mkdir ${::output}
+
+                    cd ${::output}
+                    cd ..
+                    puts "Inside: [pwd]"
+                    puts "Rin: [::exec pwd]"
+                    ##set res [::exec ls]
+                    odfi::powerbuild::exec tar -zcvf hdl-tc-x86_64-pc-linux-gnu.tar.gz hdl-tc-x86_64-pc-linux-gnu
+                    
+                    #odfi::powerbuild::exec tar -zcvf hdl-tc-x86_64-pc-linux-gnu.tar.gz -C build-x86_64-pc-linux-gnu *
+                    #odfi::powerbuild::exec tar -zcvf -C build-x86_64-pc-linux-gnu hdl-tc-x86_64-pc-linux-gnu.tar.gz  .[^.]* ..?* *
+
+
+                    
 
                 }
             }
