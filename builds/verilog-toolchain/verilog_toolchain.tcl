@@ -259,6 +259,10 @@ odfi::powerbuild::config verilogtc {
     :config gtkwave {
         :phase init {
 
+	    :requirements {
+                :package gperf
+	    }
+
             :do {
               puts "Puts inside folder: [pwd]"  
               #odfi::powerbuild::exec wget http://prdownloads.sourceforge.net/tcl/tcl8.6.5-src.tar.gz
@@ -281,7 +285,7 @@ odfi::powerbuild::config verilogtc {
                    # odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-static-libgcc -static-libstdc++ -static -lstdc++\""
 
                   
-                    odfi::powerbuild::exec sh configure --without-gconf --prefix=$output   
+                    odfi::powerbuild::exec sh configure --without-gconf  --disable-xz --prefix=$output   
 
                 }
             }
@@ -312,7 +316,7 @@ odfi::powerbuild::config verilogtc {
                     ##odfi::files::writeToFile $output/share/config.site "test -z \"\$LDFLAGS\" && LDFLAGS=\"-LC:/msys64/mingw32/bin -static-libgcc -static-libstdc++ -static -lstdc++\""
 
                    
-                    odfi::powerbuild::exec sh configure --without-gconf --prefix=$output   
+                    odfi::powerbuild::exec sh configure --without-gconf  --disable-xz --prefix=$output   
 
                 }
             }
@@ -700,7 +704,7 @@ odfi::powerbuild::config verilogtc {
         :phase compile {
             :do {
             
-                odfi::powerbuild::exec mvn package
+                odfi::powerbuild::exec mvn -U package
                
             }
         }
