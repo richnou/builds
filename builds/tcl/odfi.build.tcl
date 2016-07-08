@@ -9,11 +9,11 @@ set runKit {#!/bin/bash
 
 location="$(dirname "$(readlink -f ${BASH_SOURCE[0]})")"
 source $location/env.bash
-./build/pre.sh
-./<% return ${::kitcreator} %>
+./build/pre.sh  2>@1
+./<% return ${::kitcreator} %>  2>@1
 }
 
-set tclVersion 8.6.4
+set tclVersion 8.6.5
 
 odfi::powerbuild::config odfi {
 
@@ -34,6 +34,7 @@ odfi::powerbuild::config odfi {
             :requirements {
                 :package fossil 
                 :package autoconf
+                :package patch
                 :package make 
             }
 
@@ -61,6 +62,8 @@ odfi::powerbuild::config odfi {
                 exec echo "export PATH=\"\$PATH:[pwd]/common/helpers\"" >> env.bash
                 exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS nsf\"" >> env.bash
                 exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS itcl\"" >> env.bash
+                 exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS tclvfs\"" >> env.bash
+                  exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS mk4tcl\"" >> env.bash
 
             }
         }
@@ -75,8 +78,8 @@ odfi::powerbuild::config odfi {
                 odfi::richstream::template::stringToFile $runKit make-kit.sh
                 exec chmod +x make-kit.sh
 
-                catch {exec sh ./build/pre.sh}
-                exec sh make-kit.sh 2>@1
+                catch {odfi::powerbuild::exec sh ./build/pre.sh}
+                odfi::powerbuild::exec sh make-kit.sh
                
             }
         }
@@ -99,7 +102,7 @@ odfi::powerbuild::config odfi {
             :phase deploy {
 
                 :do {
-                    exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/tclkit-${::tclVersion}-latest-win64.exe
+                    #exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/tclkit-${::tclVersion}-latest-win64.exe
                 }
             }
         }
@@ -156,7 +159,7 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
                         :package "zip"
                     }
                     :do {
-                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
+                        set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-64bit --enable-kit-storage=cvfs"
                     }
 
                 }
@@ -164,10 +167,34 @@ cp      -Rf tcl/* inst/lib/odfi-dev-tcl/
                 :phase deploy {
 
                     :do {
-                        exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-win64.exe
+                        #exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-win64.exe
                     }
                 }
             }
+
+             ## Add CC Target
+            :config x86_64-w64-mingw32 {
+
+                :phase init {
+
+                    :requirements {
+                        :package "mingw-w64"
+                        :package "zip"
+                    }
+                    :do {
+                        set ::kitcreator "./kitcreator ${::tclVersion} --enable-64bit --enable-kit-storage=cvfs"
+                    }
+
+                }
+
+                :phase deploy {
+
+                    :do {
+                        #exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/dev-tcl-full-latest-win64.exe
+                    }
+                }
+            }
+
 
             ## Add CC Target
             :config x86_64-gnu-linux {
@@ -353,6 +380,7 @@ cp      -Rf tcl/* inst/lib/dev-hw
                             }
                         }
                     }
+
                     ## Add CC Target
                     :config x86_64-gnu-linux {
 
@@ -360,7 +388,7 @@ cp      -Rf tcl/* inst/lib/dev-hw
 
                             :requirements {
                                 :package gcc
-				:package g++
+				                :package g++
                             }
                         }
 
@@ -377,6 +405,90 @@ cp      -Rf tcl/* inst/lib/dev-hw
             }
             ## EOF H2DL
 
+
+            ## Duckdoc 
+            ##########
+            :config duckdoc {
+
+                :phase init {
+
+                    :do {
+
+                        ## Create folders
+                        if {![file exists duckdoc]} {
+                            odfi::git::clone git@github.com:richnou/odfi-doc.git duckdoc
+                        } else {
+                            odfi::git::pull duckdoc
+                        }
+                       
+
+                        ## Create Build File 
+                        odfi::richstream::template::stringToFile {#!/bin/bash
+
+## 
+mkdir   -p  out/lib/duckdoc
+mkdir   -p  inst/lib/duckdoc
+cp      -Rf tcl/* out/lib/duckdoc
+cp      -Rf tcl/* inst/lib/duckdoc
+
+                        } duckdoc/build.sh
+                        exec chmod +x duckdoc/build.sh
+                        
+
+                        ## Run Kit 
+                        #exec export KITCREATOR_PKGS="\$KITCREATOR_PKGS dev-tcl"
+                        exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS duckdoc\"" >> env.bash
+
+                    }
+                }
+
+                ## Add CC Target
+                :config win64 {
+
+                    :phase init {
+
+                        :requirements {
+                            :package "mingw-w64"
+                            :package "zip"
+                        }
+                        :do {
+                            set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
+                        }
+
+                    }
+
+                    :phase deploy {
+
+                        :do {
+                            exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/duckdoc-full-latest-win64.exe
+                        }
+                    }
+                }
+
+                ## Add CC Target
+                :config x86_64-gnu-linux {
+
+                    :phase init {
+
+                        :requirements {
+                            :package gcc
+                            :package g++
+                        }
+                    }
+
+                    :phase deploy {
+
+                        :do {
+                            exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/duckdoc-full-latest-x86_64-gnu-linux
+                        }
+                    }
+                }
+
+
+
+               
+            }
+            ## EOF Duckdoc
                 
 
     
