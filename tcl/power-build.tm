@@ -1,6 +1,7 @@
 package provide odfi::powerbuild 1.0.0
 package require odfi::language 1.0.0
 package require odfi::log 1.0.0
+package require odfi::os 
 
 namespace eval odfi::powerbuild {
 
@@ -52,22 +53,34 @@ namespace eval odfi::powerbuild {
                         $it shade odfi::powerbuild::Package eachChild {
                             {package i} => 
 
-                                odfi::log::info "Package requirement [$package name get]"
-                                set res [exec aptitude show [$package name get]]
+                                switch -glob -- "[odfi::os::getOs]" {
 
-                                ## Look for state 
-                                #puts "res $res"
-                                regexp -line {^State:\s+(.+)$} $res -> state
-                                odfi::log::info "State $state"
+                                    linux.debian {
+                                        odfi::log::info "Package requirement [$package name get]"
+                                        set res [exec aptitude show [$package name get]]
 
-                                ## test 
-                                if {$state=="not installed"} {
-                                    if {[catch {exec sudo aptitude -y install [$package name get]}]} {
-                                        error "Could not install package [$package name get]"
+                                        ## Look for state 
+                                        #puts "res $res"
+                                        regexp -line {^State:\s+(.+)$} $res -> state
+                                        odfi::log::info "State $state"
+
+                                        ## test 
+                                        if {$state=="not installed"} {
+                                            if {[catch {exec sudo aptitude -y install [$package name get]}]} {
+                                                error "Could not install package [$package name get]"
+                                            }
+                                        } else {
+                                            odfi::log::info "Package present"
+                                        }
                                     }
-                                } else {
-                                    odfi::log::info "Package present"
+
+                                    linux.arch {
+                                        #::odfi::powerbuild::exec sudo pacman -S [$package name get]
+                                        
+                                    }
                                 }
+
+                                
 
                         }
                     }
@@ -101,12 +114,12 @@ namespace eval odfi::powerbuild {
                 ## prepare build folder 
                 set buildDirectory [pwd]/$buildDirectory
 
-                odfi::log::info "Build Directory is $buildDirectory"
+                odfi::log::info "Build Directory is $buildDirectory , with filter $targetMatch and phase $phase"
 
                 :shade odfi::powerbuild::Config walkDepthFirstPreorder {
 
                     odfi::log::info "Testing node [$node getFullName]"
-                    if {[string match $targetMatch [$node getFullName]]} {
+                    if {[string match *$targetMatch [$node getFullName]]} {
                         
 
                         ## Set Build Folder 
@@ -142,6 +155,71 @@ namespace eval odfi::powerbuild {
                 }
             }
         }
+    }
+    ## EOF Language 
+
+
+    proc execRead chan {
+        if {[eof $chan]} {
+            fileevent $chan readable {}
+            set odfi::powerbuild::eofexec true
+            #puts "In Exec eof channel "
+        } else {
+            #puts "In Exec read "
+            puts -nonewline [read $chan]
+            #puts "In Exec done "
+            if {[eof $chan]} {
+                fileevent $chan readable {}
+                set odfi::powerbuild::eofexec true
+               # puts "In Exec eof channel "
+            }
+        }
+        
+
+    }
+
+    ##
+    proc exec args {
+
+
+        set monitorProcess [open "|$args 2>@1" r]
+        fconfigure $monitorProcess -blocking 0
+
+        puts "Setup file event"
+        fileevent $monitorProcess readable  [list odfi::powerbuild::execRead $monitorProcess]
+        vwait odfi::powerbuild::eofexec
+
+        catch {close $monitorProcess}
+        return 0
+
+##############################
+        ## Open file using pipe
+        set f [open ptmp {RDWR CREAT}]
+        fconfigure $f  -blocking 0 -buffering line
+        #fconfigure $f  -blocking 0
+        puts "Setup file event $args"
+        fileevent $f readable  [list odfi::powerbuild::execRead $f]
+
+        #catch {::exec $args >@$f 2>@$f & }
+        #vwait forever
+
+        catch {puts [::exec [split $args]] }
+
+        close $f
+
+        return 
+##############################
+
+
+        
+
+
+##############################
+        ## exec 
+        catch {exec $args >@$monitorfile}
+
+        close $monitorfile
+
     }
 
 

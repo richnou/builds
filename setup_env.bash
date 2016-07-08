@@ -1,6 +1,6 @@
 #!/bin/bash
 
-loc="$(dirname "$(readlink -f ${BASH_SOURCE[0]})")"
+loc=$(dirname "$(readlink -f ${BASH_SOURCE[0]})")
 
 
 ## Make sure we have TCL

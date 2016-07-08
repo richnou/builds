@@ -104,30 +104,6 @@ odfi::powerbuild::config odfi {
             }
         }
 
-	:config win64-dll {
-
-            :phase init {
-
-                :requirements {
-                    :package "mingw-w64"
-                    :package "zip"
-                }
-                :do {
-                    set ::kitcreator "build/make-kit-win64 ${::tclVersion} --enable-kit-storage=cvfs"
-        	    exec echo "export KITCREATOR_PKGS=\"\$KITCREATOR_PKGS kitdll\"" >> env.bash 
-	       }
-
-            }
-
-            :phase deploy {
-
-                :do {
-                    exec scp tclkit-${::tclVersion} ${::env(USER)}@buddy.idyria.com:/data/access/osi/files/builds/tcl/libtclkit*
-                }
-            }
-        }
-
-
         ## Dev TCL 
         ###############################
         :config dev_tcl {
