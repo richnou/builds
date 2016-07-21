@@ -13,6 +13,8 @@ namespace eval odfi::powerbuild {
             +exportToPublic
             +expose name
 
+            +var ignore false
+
             +method getFullName args {
                 if {[:isRoot]} {
                     return [:name get]
@@ -99,6 +101,11 @@ namespace eval odfi::powerbuild {
             ##################
             +method runPhase {name directory} {
 
+                ## Ignore if requested
+                if {${:ignore}} {
+                    return
+                }
+
                 :shade odfi::powerbuild::Phase eachChild {
                   
                     if {[$it name get]==$name} {
@@ -110,6 +117,20 @@ namespace eval odfi::powerbuild {
 
             }
             +method build {targetMatch phase {buildDirectory build} } {
+
+
+                set availablePhases {
+                    init 
+                    generate-sources
+                    compile 
+                    package
+                    deploy
+                }
+                if {$phase==""} {
+                    set phase deploy
+
+                }
+                set targetPhaseIndex [lsearch -exact $availablePhases $phase]
 
                 ## prepare build folder 
                 set buildDirectory [pwd]/$buildDirectory
@@ -133,17 +154,19 @@ namespace eval odfi::powerbuild {
                         try {
                             ## Run Phases and requirements
                             set allNodes [[$node getPrimaryParents]  += $node]
-                            set phases {
-                                init 
-                                generate-sources
-                                compile 
-                                package
-                                deploy
-                            }
-                            foreach phase $phases {
+
+                            
+                            foreach currentPhase $availablePhases {
+
+                                ## stop if too far 
+                                if {[lsearch -exact $availablePhases $currentPhase]>$targetPhaseIndex} {
+                                    break
+                                }
+
+                                ## Otherwise run
                                 odfi::log::info "*** Entering Phase $phase ***"
                                 $allNodes foreach {
-                                    $it runPhase "$phase" $buildFolder
+                                    $it runPhase "$currentPhase" $buildFolder
                                 }
                             }
                         } finally {

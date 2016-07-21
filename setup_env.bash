@@ -17,7 +17,7 @@ then
 
 fi
 
-source .odfi/setup.linux.bash
+source $loc/.odfi/setup.linux.bash
 odfi --update
 
 ## Done
